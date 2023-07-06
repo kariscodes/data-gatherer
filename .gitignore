@@ -1,2 +1,9 @@
 data-gatherer-venv
 __pycache__
+*.json
+*.xls
+*.xlsx
+*.doc
+*.docx
+*.ppt
+*.pptx
