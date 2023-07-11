@@ -1,9 +1,12 @@
 data-gatherer-venv
+data-gatherer.venv
 __pycache__
 *.json
+*.zip
 *.xls
 *.xlsx
 *.doc
 *.docx
 *.ppt
 *.pptx
+KIK*
