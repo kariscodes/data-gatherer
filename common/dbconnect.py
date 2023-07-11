@@ -28,6 +28,7 @@ def db_engine(server_db_name):
         db_url = f'mysql+pymysql://{db_config["user"]}:{quote(db_config["password"])}@{db_config["host"]}:{db_config["port"]}/{db_config["dbname"]}' #경로 설정
         # engine = create_engine(db_url, encoding='utf-8') #연결
         # engine = create_engine(db_url, encoding='euckr') #연결
+        # engine = create_engine(db_url, echo=False) #연결
         engine = create_engine(db_url) #연결
     else:
         pass
