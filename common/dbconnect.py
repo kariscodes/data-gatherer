@@ -28,18 +28,8 @@ def db_engine(server_db_name):
         db_url = f'mysql+pymysql://{db_config["user"]}:{quote(db_config["password"])}@{db_config["host"]}:{db_config["port"]}/{db_config["dbname"]}' #경로 설정
         # engine = create_engine(db_url, encoding='utf-8') #연결
         # engine = create_engine(db_url, encoding='euckr') #연결
+        # engine = create_engine(db_url, echo=False) #연결
         engine = create_engine(db_url) #연결
     else:
         pass
     return engine
-
-# #변수
-# user = "lkh" #사용자 이름 (수정)
-# pwd = "1234" #비밀번호 (수정)
-# host = "130.1.112.100" #호스트명/IP (수정)
-# port = 3306 #포트번호 (고정값)
-# db= "mdw" #사용할 데이터베이스 (필요시 수정)
-
-# db_url = f'mysql+pymysql://{user}:{quote(pwd)}@{host}:{port}/{db}' #경로 설정
-# engine = create_engine(db_url,encoding='utf-8') #연결
-# conn = engine.connect()
