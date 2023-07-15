@@ -1,4 +1,5 @@
 data-gatherer-venv
+data-gatherer.venv
 __pycache__
 *.json
 *.xls
