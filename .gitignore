@@ -11,4 +11,6 @@ __pycache__
 *.pptx
 *.pdf
 *.html
+*.csv
+*.txt
 KIK*
