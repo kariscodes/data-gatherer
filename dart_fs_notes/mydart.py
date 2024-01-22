@@ -92,7 +92,14 @@ def find_unit(doc_url, url=True):
 # 재무제표 주석 문서에서 특정 항목의 금액 찾기
 def find_item(doc_url):
     val_a = val_b = 0.0                    
-    doc_data = pandas.read_html(doc_url)
+    try:
+        doc_data = pandas.read_html(doc_url)
+    except ValueError:
+        val_a = val_b = 0.0
+        return  val_a, val_b
+    # except pandas.errors.EmptyDataError:
+    #     val_a = val_b = 0.0
+    #     return  val_a, val_b
     for df in doc_data:
         row = df.shape[0]
         for i in range(0, row):
@@ -104,14 +111,14 @@ def find_item(doc_url):
                 # print(i, type(df.iloc[i,1]), df.iloc[i,1])
                 if len(item) <= 30:
                     str_a = str(df.iloc[i,1])
-                    if str_a == item: val_b = -1        # 값 찾기 오류
+                    if str_a == item: val_a = -1.0      # 값 찾기 오류
                     elif str_a == "-": val_a = 0.0
                     else: val_a += str2num(str_a)       # 값을 합한다.
             elif item.__contains__('사외적립자산의 공정가치'):
                 # print(i, type(df.iloc[i,1]), df.iloc[i,1])                            
                 if len(item) <= 30:
                     str_b = str(df.iloc[i,1])
-                    if str_b == item: val_b = -1        # 값 찾기 오류
+                    if str_b == item: val_b = -1.0      # 값 찾기 오류
                     elif str_b == "-": val_b = 0.0
                     else: val_b = str2num(str_b)
             else:
