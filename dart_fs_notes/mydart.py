@@ -2,6 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 import re
 import pandas
+import math
 
 # USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.3904.108 Safari/537.36'
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
@@ -73,13 +74,32 @@ def find_unit(doc_url, url=True):
     # 확정급여채무의 현재가치, 확정급여부채의 현재가치, 확정급여채무 현재가치, 확정급여부채 현재가치
     for a in re.finditer(r"확정급여+[가-힣]+ 현재가치", doc_text):
     # for a in re.finditer(r"확정급여+[가-힣]+현재가치", doc_text):            
-        sliced_text = doc_text[a.start()-100:a.start()]
+        sliced_text = doc_text[a.start()-500:a.start()]
+        # print(sliced_text)
         trimmed_text = sliced_text.replace(" ","")     # 문서에 있는 모든 공백 제거
         unit = get_unit(trimmed_text)
         if unit != None:
             return unit
     for a in re.finditer("퇴직급여채무", doc_text):
-        sliced_text = doc_text[a.start()-100:a.start()]
+        sliced_text = doc_text[a.start()-500:a.start()]
+        trimmed_text = sliced_text.replace(" ","")     # 문서에 있는 모든 공백 제거
+        unit = get_unit(trimmed_text)
+        if unit != None:
+            return unit     
+    for a in re.finditer("확정급여채무(기말)", doc_text):
+        sliced_text = doc_text[a.start()-500:a.start()]
+        trimmed_text = sliced_text.replace(" ","")     # 문서에 있는 모든 공백 제거
+        unit = get_unit(trimmed_text)
+        if unit != None:
+            return unit
+    for a in re.finditer("퇴직급여충당부채", doc_text):
+        sliced_text = doc_text[a.start()-500:a.start()]
+        trimmed_text = sliced_text.replace(" ","")     # 문서에 있는 모든 공백 제거
+        unit = get_unit(trimmed_text)
+        if unit != None:
+            return unit                       
+    for a in re.finditer("적립형 의무의 현재가치", doc_text):
+        sliced_text = doc_text[a.start()-500:a.start()]
         trimmed_text = sliced_text.replace(" ","")     # 문서에 있는 모든 공백 제거
         unit = get_unit(trimmed_text)
         if unit != None:
@@ -91,12 +111,14 @@ def find_unit(doc_url, url=True):
 
 # 재무제표 주석 문서에서 특정 항목의 금액 찾기
 def find_item(doc_url):
-    val_a = val_b = 0.0                    
+    val_a = val_b = 0.0
+    item_result = None                    
     try:
         doc_data = pandas.read_html(doc_url)
     except ValueError:
         val_a = val_b = 0.0
-        return  val_a, val_b
+        item_result = "No Contents"
+        return  val_a, val_b, item_result
     # except pandas.errors.EmptyDataError:
     #     val_a = val_b = 0.0
     #     return  val_a, val_b
@@ -104,25 +126,40 @@ def find_item(doc_url):
         row = df.shape[0]
         for i in range(0, row):
             item = str(df.iloc[i,0])
-            # if item.__contains__('확정급여채무의 현재가치') or item.__contains__('확정급여부채의 현재가치') or item.__contains__('퇴직급여채무'):
             if item.__contains__('확정급여채무의 현재가치') or item.__contains__('확정급여부채의 현재가치') or \
                 item.__contains__('확정급여채무 현재가치') or item.__contains__('확정급여부채 현재가치') or \
-                item.__contains__('퇴직급여채무'):                
-                # print(i, type(df.iloc[i,1]), df.iloc[i,1])
+                item.__contains__('적립형 의무의 현재가치') or item.__contains__('퇴직급여채무의 현재가치') or \
+                item == '확정급여채무(기말)' or item == '퇴직급여채무' or item == '퇴직급여충당부채':
+                # item.__contains__('확정급여채무') or item.__contains__('퇴직급여채무') or item.__contains__('퇴직급여충당부채') or \               
+                if item_result is None:
+                    item_result = item
+                else:
+                    item_result = item_result + ", " + item 
                 if len(item) <= 30:
-                    str_a = str(df.iloc[i,1])
-                    if str_a == item: val_a = -1.0      # 값 찾기 오류
-                    elif str_a == "-": val_a = 0.0
-                    else: val_a += str2num(str_a)       # 값을 합한다.
-            elif item.__contains__('사외적립자산의 공정가치'):
-                # print(i, type(df.iloc[i,1]), df.iloc[i,1])                            
+                    if isinstance(df.iloc[i,1], float) and math.isnan(df.iloc[i,1]):
+                        val_a = -1.0                        # 값 찾기 오류
+                    else:                        
+                        str_a = str(df.iloc[i,1])
+                        if str_a == item: val_a = -1.0      # 값 찾기 오류
+                        elif str_a == "-": val_a += 0.0
+                        else: val_a += str2num(str_a)       # 값을 합한다.
+            elif item.__contains__('사외적립자산의 공정가치') or item.__contains__('사외적립자산 공정가치'):
+                #  item == '사외적립자산':
+                #  item == '퇴직연금운용자산' or item == '사외적립자산':
+                if item_result is None:
+                    item_result = item
+                else:
+                    item_result = item_result + ", " + item                                            
                 if len(item) <= 30:
-                    str_b = str(df.iloc[i,1])
-                    if str_b == item: val_b = -1.0      # 값 찾기 오류
-                    elif str_b == "-": val_b = 0.0
-                    else: val_b = str2num(str_b)
+                    if isinstance(df.iloc[i,1], float) and math.isnan(df.iloc[i,1]):
+                        val_b = -1.0                        # 값 찾기 오류
+                    else:                                       
+                        str_b = str(df.iloc[i,1])
+                        if str_b == item: val_b = -1.0      # 값 찾기 오류
+                        elif str_b == "-": val_b += 0.0
+                        else: val_b = str2num(str_b)
             else:
                 continue    
         if (val_a != 0.0) and (val_b != 0.0):
             break   
-    return val_a, val_b
+    return val_a, val_b, item_result
