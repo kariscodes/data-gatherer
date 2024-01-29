@@ -186,7 +186,7 @@ def find_item_from_section(html_doc):
                         elif str_a == "-": val_a += 0.0
                         else: val_a += str2num(str_a)       # 값을 합한다.
             elif item_trimmed.__contains__('사외적립자산의공정가치') or item_trimmed.__contains__('사외적립자산공정가치') or \
-                 item_trimmed == '사외적립자산' or item == '퇴직연금운용자산':
+                 item_trimmed == '사외적립자산' or item_trimmed == '퇴직연금운용자산':
                 if item_result is None:
                     item_result = item
                 else:
