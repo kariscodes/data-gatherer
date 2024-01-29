@@ -171,7 +171,8 @@ def find_item_from_section(html_doc):
             if item_trimmed.__contains__('확정급여채무의현재가치') or item_trimmed.__contains__('확정급여부채의현재가치') or \
                 item_trimmed.__contains__('확정급여채무현재가치') or item_trimmed.__contains__('확정급여부채현재가치') or \
                 item_trimmed.__contains__('적립형의무의현재가치') or item_trimmed.__contains__('퇴직급여채무의현재가치') or \
-                item_trimmed.__contains__('확정급여채무') or item_trimmed.__contains__('퇴직급여채무') or item_trimmed.__contains__('퇴직급여충당부채'):
+                item_trimmed == '확정급여채무' or item_trimmed == '확정급여채무(기말)' or \
+                item_trimmed == '퇴직급여채무' or item_trimmed == '퇴직급여충당부채':
                 if item_result is None:
                     item_result = item
                 else:
@@ -184,9 +185,8 @@ def find_item_from_section(html_doc):
                         if str_a == item: val_a = -1.0      # 값 찾기 오류
                         elif str_a == "-": val_a += 0.0
                         else: val_a += str2num(str_a)       # 값을 합한다.
-            elif item_trimmed.__contains__('사외적립자산의공정가치') or item_trimmed.__contains__('사외적립자산공정가치'):
-                #  item == '사외적립자산':
-                #  item == '퇴직연금운용자산' or item == '사외적립자산':
+            elif item_trimmed.__contains__('사외적립자산의공정가치') or item_trimmed.__contains__('사외적립자산공정가치') or \
+                 item_trimmed == '사외적립자산' or item == '퇴직연금운용자산':
                 if item_result is None:
                     item_result = item
                 else:
