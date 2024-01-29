@@ -71,16 +71,23 @@ def get_document(doc_url):
 def get_subtitles(soup):        
     # tags = soup.find_all('p')
     tags = soup.find_all(string = True)
+    ex_subject1 = re.compile('\d-+\d+[.]+[^0-9]+')      # 숫자-숫자+'.'+숫자가아닌모든문자열
+    ex_subject2 = re.compile('\d-+\d-+\d+[.]+[^0-9]+')  # 숫자-숫자-숫자+'.'+숫자가아닌모든문자열    
+    ex_subject3 = re.compile('\d+[.]+\d+[.]+[^0-9]+')   # 숫자+'.'+숫자+'.'+숫자가아닌모든문자열
+    ex_subject4 = re.compile('\d+[.]+\d+[.]+\d+[.]+[^0-9]+')  # 숫자+'.'+숫자+'.'+숫자+'.'+숫자가아닌모든문자열            
     subtitle_list = []
-    prev_number = 0
     for t in tags:
-        subjects1 = re.findall('\d+[.]+\s+[^0-9]+', t.text)  # 숫자+'.'+공백+숫자가아닌모든문자열     
-        subjects2 = re.findall('\d+[.]+[^0-9]+', t.text)  # 숫자+'.'+숫자가아닌모든문자열
-        subjects_all = subjects1 + subjects2
-        subjects = list(set(subjects_all))      # 중복 제거
-        if len(subjects) > 0:
-            for s in subjects:
-                subtitle_list.append(s)               
+        if ex_subject1.match(t.text) or ex_subject2.match(t.text) or \
+           ex_subject3.match(t.text) or ex_subject4.match(t.text):
+            pass
+        else:      
+            subjects1 = re.findall('\d+[.]+\s+[^0-9]+', t.text) # 숫자+'.'+공백+숫자가아닌모든문자열     
+            subjects2 = re.findall('\d+[.]+[^0-9]+', t.text)    # 숫자+'.'+숫자가아닌모든문자열
+            subjects_all = subjects1 + subjects2
+            subjects = list(set(subjects_all))      # 중복 제거
+            if len(subjects) > 0:
+                for s in subjects:
+                    subtitle_list.append(s.rstrip())    # 문자열 끝의 공백 없애고 list에 추가
     
     ordered_subtitle_list = []
     prev_no = 0             
@@ -160,11 +167,11 @@ def find_item_from_section(html_doc):
         row = df.shape[0]
         for i in range(0, row):
             item = str(df.iloc[i,0])
-            if item.__contains__('확정급여채무의 현재가치') or item.__contains__('확정급여부채의 현재가치') or \
-                item.__contains__('확정급여채무 현재가치') or item.__contains__('확정급여부채 현재가치') or \
-                item.__contains__('적립형 의무의 현재가치') or item.__contains__('퇴직급여채무의 현재가치') or \
-                item == '확정급여채무(기말)' or item == '퇴직급여채무' or item == '퇴직급여충당부채':
-                # item.__contains__('확정급여채무') or item.__contains__('퇴직급여채무') or item.__contains__('퇴직급여충당부채') or \               
+            item_trimmed = item.replace(" ", "")
+            if item_trimmed.__contains__('확정급여채무의현재가치') or item_trimmed.__contains__('확정급여부채의현재가치') or \
+                item_trimmed.__contains__('확정급여채무현재가치') or item_trimmed.__contains__('확정급여부채현재가치') or \
+                item_trimmed.__contains__('적립형의무의현재가치') or item_trimmed.__contains__('퇴직급여채무의현재가치') or \
+                item_trimmed.__contains__('확정급여채무') or item_trimmed.__contains__('퇴직급여채무') or item_trimmed.__contains__('퇴직급여충당부채'):
                 if item_result is None:
                     item_result = item
                 else:
@@ -177,7 +184,7 @@ def find_item_from_section(html_doc):
                         if str_a == item: val_a = -1.0      # 값 찾기 오류
                         elif str_a == "-": val_a += 0.0
                         else: val_a += str2num(str_a)       # 값을 합한다.
-            elif item.__contains__('사외적립자산의 공정가치') or item.__contains__('사외적립자산 공정가치'):
+            elif item_trimmed.__contains__('사외적립자산의공정가치') or item_trimmed.__contains__('사외적립자산공정가치'):
                 #  item == '사외적립자산':
                 #  item == '퇴직연금운용자산' or item == '사외적립자산':
                 if item_result is None:
