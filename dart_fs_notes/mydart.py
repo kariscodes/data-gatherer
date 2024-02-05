@@ -3,6 +3,16 @@ from bs4 import BeautifulSoup
 import re
 import pandas
 import math
+import os
+
+root_path = "D:/dart"
+
+def createDirectory(directory):
+    try:
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+    except OSError:
+        print("Error: Failed to create the directory.")
 
 # USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.3904.108 Safari/537.36'
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
@@ -11,6 +21,7 @@ api_key = 'f2e08d4ed3de0ba3d5cbf59c04c223e02b1751a2'
 params = {
     'crtfc_key': api_key,
 }
+
 
 # def html_download(url, fn=None):
 #     r = requests.get(url, stream=True, headers={'User-Agent': USER_AGENT})
